@@ -1,5 +1,7 @@
 #include "common.hpp"
 
+#include <sstream>
+
 std::ifstream boostrap(int const argc, char const** const argv)
 {
 	if (argc < 2) {
@@ -18,8 +20,8 @@ std::ifstream boostrap(int const argc, char const** const argv)
 
 std::string load_file(std::ifstream in)
 {
-	std::string program;
-	std::getline(in, program);
+	std::ostringstream oss;
+	oss << in.rdbuf();
 
-	return program;
+	return oss.str();
 }
