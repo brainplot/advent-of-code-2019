@@ -6,9 +6,17 @@ else()
 	add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
+add_library(common STATIC common.cpp)
+
 macro(add_challenge challenge)
-	add_executable(${challenge})
-	target_sources(${challenge} PRIVATE ${challenge}.cpp)
+	string(REGEX REPLACE "\\.[^.]*$" "" BASENAME ${challenge})
+	add_executable(${BASENAME})
+	target_sources(${BASENAME} PRIVATE ${BASENAME}.cpp)
+	target_link_libraries(${BASENAME} common)
 endmacro()
 
-add_challenge(day_2)
+file(GLOB CHALLENGES LIST_DIRECTORIES false RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} day_*.cpp)
+
+foreach(CHALLENGE ${CHALLENGES})
+	add_challenge(${CHALLENGE})
+endforeach()

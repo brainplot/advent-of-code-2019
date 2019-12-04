@@ -1,14 +1,11 @@
+#include "common.hpp"
+
 #include <charconv>
 #include <cstdint>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <string>
 #include <system_error>
-#include <vector>
 
-std::ifstream boostrap(int, char const**);
-std::string load_file(std::ifstream in);
 std::vector<unsigned> get_program(std::string const& in);
 void run_program(std::vector<unsigned>& p);
 void print_result(std::uint8_t, std::uint8_t);
@@ -29,30 +26,6 @@ int main(int const argc, char const** const argv)
 			}
 		}
 	}
-}
-
-std::ifstream boostrap(int const argc, char const** const argv)
-{
-	if (argc < 2) {
-		std::cerr << "Not enough arguments.\nPlease supply input file.\n";
-		std::exit(EXIT_FAILURE);
-	}
-
-	std::ifstream in(argv[1]);
-	if (!in) {
-		std::cerr << "Error while opening " << argv[1] << '\n';
-		std::exit(EXIT_FAILURE);
-	}
-
-	return in;
-}
-
-std::string load_file(std::ifstream in)
-{
-	std::string program;
-	std::getline(in, program);
-
-	return program;
 }
 
 std::vector<unsigned> get_program(std::string const& in)
