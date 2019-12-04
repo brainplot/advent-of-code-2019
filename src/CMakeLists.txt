@@ -6,5 +6,9 @@ else()
 	add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
-add_executable(${PROJECT_NAME})
-target_sources(${PROJECT_NAME} PRIVATE main.cpp)
+macro(add_challenge challenge)
+	add_executable(${challenge})
+	target_sources(${challenge} PRIVATE ${challenge}.cpp)
+endmacro()
+
+add_challenge(day_2)
