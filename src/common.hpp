@@ -1,9 +1,11 @@
 #ifndef SRC_COMMON_HPP
 #define SRC_COMMON_HPP
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
