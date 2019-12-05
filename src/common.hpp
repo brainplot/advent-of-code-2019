@@ -2,6 +2,7 @@
 #define SRC_COMMON_HPP
 
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <string>
