@@ -12,7 +12,7 @@ void print_result(std::uint8_t, std::uint8_t);
 
 int main(int const argc, char const** const argv)
 {
-	auto const program = get_program(load_file(boostrap(argc, argv)));
+	auto const program = get_program(load_file(bootstrap(argc, argv)));
 
 	for (std::uint8_t i = 0; i < 100; ++i) {
 		for (std::uint8_t j = 0; j < 100; ++j) {

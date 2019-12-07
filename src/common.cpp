@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-std::ifstream boostrap(int const argc, char const** const argv)
+std::ifstream bootstrap(int const argc, char const** const argv)
 {
 	if (argc < 2) {
 		std::cerr << "Not enough arguments.\nPlease supply input file.\n";
@@ -32,7 +32,11 @@ std::vector<std::string_view> split(std::string_view input, char const* const de
 
 	while (true) {
 		auto const found_at = input.find_first_of(delimiters);
-		v.emplace_back(input.substr(0, found_at));
+		auto const substr = input.substr(0, found_at);
+
+		if (!substr.empty())
+			v.emplace_back(substr);
+
 		if (found_at != std::string::npos)
 			input.remove_prefix(found_at + 1);
 		else

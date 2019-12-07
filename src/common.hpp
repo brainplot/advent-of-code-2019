@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-std::ifstream boostrap(int, char const**);
+std::ifstream bootstrap(int, char const**);
 
 std::string load_file(std::ifstream in);
 

@@ -135,6 +135,6 @@ void run(std::vector<int>& program)
 
 int main(int const argc, char const** const argv)
 {
-	auto program = parse_program(load_file(boostrap(argc, argv)));
+	auto program = parse_program(load_file(bootstrap(argc, argv)));
 	run(program);
 }

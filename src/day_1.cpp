@@ -9,7 +9,7 @@ Field compute_fuel(Field) noexcept;
 
 int main(int const argc, char const** const argv)
 {
-	auto input_file = boostrap(argc, argv);
+	auto input_file = bootstrap(argc, argv);
 	auto const res = std::accumulate(std::istream_iterator<Field>{input_file},
 	                                 std::istream_iterator<Field>{},
 	                                 Field(0),
