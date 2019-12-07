@@ -15,6 +15,6 @@ std::ifstream boostrap(int, char const**);
 
 std::string load_file(std::ifstream in);
 
-std::vector<std::string_view> split(std::string_view, char);
+std::vector<std::string_view> split(std::string_view, char const*);
 
 #endif // SRC_COMMON_HPP
