@@ -73,20 +73,29 @@ void intcode_computer::handle_binary_op(value_type (*const op)(value_type const,
 
 void intcode_computer::handle_in()
 {
+	_program[_program[_ip + 1]] = input_handler();
+	_ip += 2;
+}
+
+intcode_computer::value_type intcode_computer::input_handler()
+{
 	std::cout << "Input: " << std::flush;
 
 	value_type input;
 	std::cin >> input;
 
-	_program[_program[_ip + 1]] = input;
-
-	_ip += 2;
+	return input;
 }
 
 void intcode_computer::handle_out()
 {
-	std::cout << _program[_program[_ip + 1]] << '\n';
+	output_handler(_program[_program[_ip + 1]]);
 	_ip += 2;
+}
+
+void intcode_computer::output_handler(intcode_computer::value_type const data)
+{
+	std::cout << data << '\n';
 }
 
 void intcode_computer::handle_jump(bool (*const cond)(value_type const)) noexcept

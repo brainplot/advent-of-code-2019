@@ -24,6 +24,9 @@ private:
 	void handle_out();
 	void handle_jump(bool (*cond)(value_type)) noexcept;
 
+	virtual value_type input_handler();
+	virtual void output_handler(value_type data);
+
 	static constexpr action get_action(value_type opcode) noexcept;
 
 	template<std::uint8_t N>
