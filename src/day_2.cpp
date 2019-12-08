@@ -17,10 +17,12 @@ public:
 
 		return _program[result_location];
 	}
+
 private:
 	intcode_computer2(program_type program) noexcept
-	: intcode_computer(std::move(program))
-	{}
+	    : intcode_computer(std::move(program))
+	{
+	}
 };
 
 void print_result(std::uint8_t const n1, std::uint8_t const n2)
