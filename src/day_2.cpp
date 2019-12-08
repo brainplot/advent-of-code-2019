@@ -1,26 +1,45 @@
-#include "common.hpp"
+#include "intcode.hpp"
 
-#include <charconv>
-#include <cstdint>
-#include <cstdlib>
-#include <iostream>
-#include <system_error>
+class intcode_computer2 : public intcode_computer {
+public:
+	static intcode_computer2 from_string(std::string const& in)
+	{
+		return intcode_computer2(parse_program(in));
+	}
 
-std::vector<unsigned> get_program(std::string const& in);
-void run_program(std::vector<unsigned>& p);
-void print_result(std::uint8_t, std::uint8_t);
+	value_type run(std::initializer_list<std::pair<size_type, value_type>> const& replacements,
+	               size_type result_location = 0)
+	{
+		for (auto const [index, value] : replacements)
+			_program[index] = value;
 
-int main(int const argc, char const** const argv)
+		intcode_computer::run();
+
+		return _program[result_location];
+	}
+private:
+	intcode_computer2(program_type program) noexcept
+	: intcode_computer(std::move(program))
+	{}
+};
+
+void print_result(std::uint8_t const n1, std::uint8_t const n2)
 {
-	auto const program = get_program(load_file(bootstrap(argc, argv)));
+	std::cout << 100 * n1 + n2 << '\n';
+}
 
+void part_one(intcode_computer2 program)
+{
+	std::cout << program.run({{1, 12}, {2, 2}}) << '\n';
+}
+
+void part_two(intcode_computer2 const& program, intcode_computer2::value_type const target)
+{
 	for (std::uint8_t i = 0; i < 100; ++i) {
 		for (std::uint8_t j = 0; j < 100; ++j) {
 			auto program_copy{program};
-			program_copy[1] = i;
-			program_copy[2] = j;
-			run_program(program_copy);
-			if (program_copy.front() == 19690720) {
+			auto const result = program_copy.run({{1, i}, {2, j}});
+			if (result == target) {
 				print_result(i, j);
 				break;
 			}
@@ -28,45 +47,10 @@ int main(int const argc, char const** const argv)
 	}
 }
 
-std::vector<unsigned> get_program(std::string const& in)
+int main(int const argc, char const** const argv)
 {
-	auto const end = in.data() + in.size();
-	std::vector<unsigned> v;
+	auto program = intcode_computer2::from_string(load_file(bootstrap(argc, argv)));
 
-	unsigned result;
-	for (auto begin = in.data(); begin < end;) {
-		auto const [ptr, ec] = std::from_chars(begin, end, result);
-		if (ec == std::errc())
-			v.emplace_back(result);
-		begin = ptr + 1;
-	}
-
-	return v;
-}
-
-void run_program(std::vector<unsigned>& prog)
-{
-	constexpr unsigned ADD = 1;
-	constexpr unsigned MUL = 2;
-	constexpr unsigned HALT = 99;
-
-	for (decltype(prog.size()) pc = 0; prog[pc] != HALT; pc += 4) {
-		auto const first_op = prog[prog[pc + 1]];
-		auto const second_op = prog[prog[pc + 2]];
-		auto& result = prog[prog[pc + 3]];
-
-		switch (prog[pc]) {
-		case ADD:
-			result = first_op + second_op;
-			break;
-		case MUL:
-			result = first_op * second_op;
-			break;
-		}
-	}
-}
-
-void print_result(std::uint8_t const i, std::uint8_t const j)
-{
-	std::cout << 100 * i + j << '\n';
+	part_one(program);
+	part_two(program, 19690720);
 }

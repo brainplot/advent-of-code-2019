@@ -7,6 +7,7 @@ else()
 endif()
 
 add_library(common STATIC common.cpp)
+add_library(intcode STATIC intcode.cpp)
 
 macro(add_challenge challenge)
 	string(REGEX REPLACE "\\.[^.]*$" "" BASENAME ${challenge})
@@ -19,4 +20,9 @@ file(GLOB CHALLENGES LIST_DIRECTORIES false RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 
 foreach(CHALLENGE ${CHALLENGES})
 	add_challenge(${CHALLENGE})
+endforeach()
+
+set(INTCODE_CHALLENGES 2;5)
+foreach(CHL ${INTCODE_CHALLENGES})
+	target_link_libraries(day_${CHL} intcode)
 endforeach()
