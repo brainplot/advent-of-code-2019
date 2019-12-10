@@ -3,15 +3,15 @@
 
 #include "common.hpp"
 
-class intcode_computer {
+class intcode_computer_base {
 public:
 	using program_type = std::vector<int>;
 	using value_type = program_type::value_type;
 	using size_type = program_type::size_type;
 
-	static intcode_computer from_string(std::string const& program_str);
-
 	void run();
+	void insert(size_type pos, value_type value) noexcept;
+	value_type peek(size_type pos = 0) const noexcept;
 
 private:
 	enum class action : std::uint8_t;
@@ -42,11 +42,25 @@ private:
 	}
 
 protected:
-	explicit intcode_computer(program_type program) noexcept;
+	explicit intcode_computer_base(program_type* program) noexcept;
+	virtual ~intcode_computer_base();
+
 	static program_type parse_program(std::string const& in);
 
-	program_type _program;
+	program_type* _current_program;
 	size_type _ip;
+};
+
+class monotask_intcode_computer : public intcode_computer_base {
+public:
+	static monotask_intcode_computer from_string(std::string const& str);
+	monotask_intcode_computer(monotask_intcode_computer const& other);
+	monotask_intcode_computer& operator=(monotask_intcode_computer const& other);
+
+protected:
+	monotask_intcode_computer(program_type program) noexcept;
+
+	program_type _program;
 };
 
 #endif // SRC_INTCODE_HPP
