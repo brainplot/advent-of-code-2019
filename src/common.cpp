@@ -2,6 +2,10 @@
 
 #include <sstream>
 
+namespace {
+auto constexpr whitespace = [](unsigned char const ch) { return std::isspace(ch); };
+}
+
 std::ifstream bootstrap(int const argc, char const** const argv)
 {
 	if (argc < 2) {
@@ -44,4 +48,20 @@ std::vector<std::string_view> split(std::string_view input, char const* const de
 	}
 
 	return v;
+}
+
+void trim_left(std::string& str) noexcept
+{
+	str.erase(str.cbegin(), std::find_if_not(str.cbegin(), str.cend(), whitespace));
+}
+
+void trim_right(std::string& str) noexcept
+{
+	str.erase(std::find_if_not(str.crbegin(), str.crend(), whitespace).base(), str.cend());
+}
+
+void trim(std::string& str) noexcept
+{
+	trim_left(str);
+	trim_right(str);
 }

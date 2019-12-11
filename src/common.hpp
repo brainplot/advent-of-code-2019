@@ -18,6 +18,12 @@ std::string load_file(std::ifstream in);
 
 std::vector<std::string_view> split(std::string_view, char const*);
 
+void trim_left(std::string& str) noexcept;
+
+void trim_right(std::string& str) noexcept;
+
+void trim(std::string& str) noexcept;
+
 template<class Unit, class Function>
 void time_execution(Function const& f) noexcept(noexcept(f))
 {
