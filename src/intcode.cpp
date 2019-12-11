@@ -1,8 +1,8 @@
 #include "intcode.hpp"
 
-enum class intcode_computer_base::mode : std::uint8_t { POS = 0, IMM = 1 };
+enum class intcode_base::mode : std::uint8_t { POS = 0, IMM = 1 };
 
-enum class intcode_computer_base::action : std::uint8_t {
+enum class intcode_base::action : std::uint8_t {
 	ADD = 1,
 	MUL = 2,
 	IN = 3,
@@ -14,98 +14,75 @@ enum class intcode_computer_base::action : std::uint8_t {
 	HALT = 99
 };
 
-intcode_computer_base::intcode_computer_base(intcode_computer_base::program_type* const program) noexcept
-    : _current_program(program)
+intcode_base::intcode_base(intcode_base::program_type const program) noexcept
+    : _program(std::move(program))
     , _ip(0)
 {
 }
 
-intcode_computer_base::~intcode_computer_base() = default;
+intcode_base::~intcode_base() = default;
 
-intcode_computer_base::program_type intcode_computer_base::parse_program(std::string const& in)
+intcode_base::program_type intcode_base::parse_program(std::string const& in)
 {
 	program_type v;
 	v.reserve(in.size() / 2);
 
 	for (auto start = in.data(), end = start + in.size(); start < end;) {
 		value_type result;
-		start = std::from_chars(start, end, result).ptr + 1;
+		start = (std::from_chars(start, end, result).ptr + 1);
 		v.emplace_back(result);
 	}
 
 	return v;
 }
 
-constexpr intcode_computer_base::action
-intcode_computer_base::get_action(intcode_computer_base::value_type const opcode) noexcept
+constexpr intcode_base::action intcode_base::get_action(intcode_base::value_type const opcode) noexcept
 {
-	return static_cast<intcode_computer_base::action>(opcode % 100);
+	return static_cast<intcode_base::action>(opcode % 100);
 }
 
-constexpr intcode_computer_base::value_type intcode_computer_base::get_parameter(std::size_t const pos,
-                                                                                 mode const m) const noexcept
+constexpr intcode_base::value_type intcode_base::get_parameter(std::size_t const pos, mode const m) const noexcept
 {
-	auto const& program = *_current_program;
 	value_type res = 0;
 
 	switch (m) {
 	case mode::IMM:
-		res = program[pos];
+		res = _program[pos];
 		break;
 	case mode::POS:
-		res = program[program[pos]];
+		res = _program[_program[pos]];
 		break;
 	}
 
 	return res;
 }
 
-void intcode_computer_base::handle_binary_op(value_type (*const op)(value_type const, value_type const)) noexcept
+void intcode_base::binary_op(value_type (*const op)(value_type const, value_type const)) noexcept
 {
-	auto& program = *_current_program;
-	auto const p1 = get_parameter(_ip + 1, get_parameter_mode<1>(program[_ip]));
-	auto const p2 = get_parameter(_ip + 2, get_parameter_mode<2>(program[_ip]));
+	auto const p1 = get_parameter(_ip + 1, get_parameter_mode<1>(_program[_ip]));
+	auto const p2 = get_parameter(_ip + 2, get_parameter_mode<2>(_program[_ip]));
 
-	program[program[_ip + 3]] = op(p1, p2);
+	_program[_program[_ip + 3]] = op(p1, p2);
 
 	_ip += 4;
 }
 
-void intcode_computer_base::handle_in()
+void intcode_base::input()
 {
-	auto& program = *_current_program;
-	program[program[_ip + 1]] = input_handler();
-}
-
-intcode_computer_base::value_type intcode_computer_base::input_handler()
-{
-	std::cout << "Input: " << std::flush;
-
-	value_type input;
-	std::cin >> input;
-
-	_ip += 2;
-
-	return input;
-}
-
-void intcode_computer_base::handle_out()
-{
-	auto const& program = *_current_program;
-	output_handler(program[program[_ip + 1]]);
-}
-
-void intcode_computer_base::output_handler(intcode_computer_base::value_type const data)
-{
-	std::cout << data << '\n';
+	_program[_program[_ip + 1]] = input_handler();
 	_ip += 2;
 }
 
-void intcode_computer_base::handle_jump(bool (*const cond)(value_type const)) noexcept
+void intcode_base::output()
 {
-	auto const& program = *_current_program;
-	auto const p1 = get_parameter(_ip + 1, get_parameter_mode<1>(program[_ip]));
-	auto const p2 = get_parameter(_ip + 2, get_parameter_mode<2>(program[_ip]));
+	output_handler(_program[_program[_ip + 1]]);
+	_ip += 2;
+}
+
+void intcode_base::jump(bool (*const cond)(value_type const)) noexcept
+{
+	auto const p1 = get_parameter(_ip + 1, get_parameter_mode<1>(_program[_ip]));
+	auto const p2 = get_parameter(_ip + 2, get_parameter_mode<2>(_program[_ip]));
 
 	if (cond(p1))
 		_ip = p2;
@@ -113,49 +90,46 @@ void intcode_computer_base::handle_jump(bool (*const cond)(value_type const)) no
 		_ip += 3;
 }
 
-void intcode_computer_base::insert(intcode_computer_base::size_type const pos,
-                                   intcode_computer_base::value_type const value) noexcept
+void intcode_base::insert(intcode_base::size_type const pos, intcode_base::value_type const value) noexcept
 {
-	(*_current_program)[pos] = value;
+	_program[pos] = value;
 }
 
-intcode_computer_base::value_type intcode_computer_base::peek(size_type const pos) const noexcept
+intcode_base::value_type intcode_base::peek(size_type const pos) const noexcept
 {
-	return (*_current_program)[pos];
+	return _program[pos];
 }
 
-void intcode_computer_base::run()
+void intcode_base::run()
 {
-	auto const& program = *_current_program;
-
 	while (true) {
-		auto const opcode = program[_ip];
+		auto const opcode = _program[_ip];
 		auto const action = get_action(opcode);
 
 		switch (action) {
 		case action::ADD:
-			handle_binary_op([](value_type const lhs, value_type const rhs) { return lhs + rhs; });
+			binary_op([](value_type const lhs, value_type const rhs) { return lhs + rhs; });
 			break;
 		case action::MUL:
-			handle_binary_op([](value_type const lhs, value_type const rhs) { return lhs * rhs; });
+			binary_op([](value_type const lhs, value_type const rhs) { return lhs * rhs; });
 			break;
 		case action::IN:
-			handle_in();
+			input();
 			break;
 		case action::OUT:
-			handle_out();
+			output();
 			break;
 		case action::LT:
-			handle_binary_op([](value_type const lhs, value_type const rhs) { return value_type(lhs < rhs); });
+			binary_op([](value_type const lhs, value_type const rhs) { return value_type(lhs < rhs); });
 			break;
 		case action::EQ:
-			handle_binary_op([](value_type const lhs, value_type const rhs) { return value_type(lhs == rhs); });
+			binary_op([](value_type const lhs, value_type const rhs) { return value_type(lhs == rhs); });
 			break;
 		case action::JMPT:
-			handle_jump([](value_type const x) { return x != 0; });
+			jump([](value_type const x) { return x != 0; });
 			break;
 		case action::JMPF:
-			handle_jump([](value_type const x) { return x == 0; });
+			jump([](value_type const x) { return x == 0; });
 			break;
 		case action::HALT:
 			return;
@@ -163,27 +137,27 @@ void intcode_computer_base::run()
 	}
 }
 
-monotask_intcode_computer::monotask_intcode_computer(monotask_intcode_computer::program_type program) noexcept
-    : intcode_computer_base(&_program)
-    , _program(std::move(program))
+interactive_intcode::interactive_intcode(interactive_intcode::program_type program) noexcept
+    : intcode_base(std::move(program))
 {
 }
 
-monotask_intcode_computer::monotask_intcode_computer(monotask_intcode_computer const& other)
-: intcode_computer_base(&_program)
-, _program(other._program)
-{}
-
-monotask_intcode_computer& monotask_intcode_computer::operator=(monotask_intcode_computer const& other)
+interactive_intcode interactive_intcode::from_string(const std::string& str)
 {
-	_program = other._program;
-	_current_program = &_program;
-	_ip = other._ip;
-
-	return *this;
+	return interactive_intcode(parse_program(str));
 }
 
-monotask_intcode_computer monotask_intcode_computer::from_string(const std::string& str)
+interactive_intcode::value_type interactive_intcode::input_handler()
 {
-	return monotask_intcode_computer(parse_program(str));
+	std::cout << "Input: " << std::flush;
+
+	value_type input;
+	std::cin >> input;
+
+	return input;
+}
+
+void interactive_intcode::output_handler(interactive_intcode::value_type const output)
+{
+	std::cout << output << '\n';
 }

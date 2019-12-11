@@ -3,9 +3,9 @@
 
 #include "common.hpp"
 
-class intcode_computer_base {
+class intcode_base {
 public:
-	using program_type = std::vector<int>;
+	using program_type = std::vector<long>;
 	using value_type = program_type::value_type;
 	using size_type = program_type::size_type;
 
@@ -17,15 +17,15 @@ private:
 	enum class action : std::uint8_t;
 	enum class mode : std::uint8_t;
 
-	constexpr int get_parameter(size_type pos, mode m) const noexcept;
+	constexpr value_type get_parameter(size_type pos, mode m) const noexcept;
 
-	void handle_binary_op(value_type (*op)(value_type, value_type)) noexcept;
-	void handle_in();
-	void handle_out();
-	void handle_jump(bool (*cond)(value_type)) noexcept;
+	void binary_op(value_type (*op)(value_type, value_type)) noexcept;
+	void input();
+	void output();
+	void jump(bool (*cond)(value_type)) noexcept;
 
-	virtual value_type input_handler();
-	virtual void output_handler(value_type data);
+	virtual value_type input_handler() = 0;
+	virtual void output_handler(value_type data) = 0;
 
 	static constexpr action get_action(value_type opcode) noexcept;
 
@@ -42,25 +42,24 @@ private:
 	}
 
 protected:
-	explicit intcode_computer_base(program_type* program) noexcept;
-	virtual ~intcode_computer_base();
+	explicit intcode_base(program_type program) noexcept;
+	virtual ~intcode_base();
 
 	static program_type parse_program(std::string const& in);
 
-	program_type* _current_program;
+	program_type _program;
 	size_type _ip;
 };
 
-class monotask_intcode_computer : public intcode_computer_base {
+class interactive_intcode : public intcode_base {
 public:
-	static monotask_intcode_computer from_string(std::string const& str);
-	monotask_intcode_computer(monotask_intcode_computer const& other);
-	monotask_intcode_computer& operator=(monotask_intcode_computer const& other);
+	static interactive_intcode from_string(std::string const& str);
 
-protected:
-	monotask_intcode_computer(program_type program) noexcept;
+private:
+	interactive_intcode(program_type program) noexcept;
 
-	program_type _program;
+	value_type input_handler() override;
+	void output_handler(value_type output) override;
 };
 
 #endif // SRC_INTCODE_HPP

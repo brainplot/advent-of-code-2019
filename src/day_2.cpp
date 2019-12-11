@@ -1,6 +1,6 @@
 #include "intcode.hpp"
 
-void part_one(monotask_intcode_computer program)
+void part_one(interactive_intcode program)
 {
 	program.insert(1, 12);
 	program.insert(2, 2);
@@ -8,7 +8,7 @@ void part_one(monotask_intcode_computer program)
 	std::cout << program.peek() << '\n';
 }
 
-void part_two(monotask_intcode_computer const& program, monotask_intcode_computer::value_type const target)
+void part_two(interactive_intcode const& program, interactive_intcode::value_type const target)
 {
 	auto found = false;
 
@@ -29,7 +29,7 @@ void part_two(monotask_intcode_computer const& program, monotask_intcode_compute
 
 int main(int const argc, char const** const argv)
 {
-	auto program = monotask_intcode_computer::from_string(load_file(bootstrap(argc, argv)));
+	auto program = interactive_intcode::from_string(load_file(bootstrap(argc, argv)));
 
 	part_one(program);
 	part_two(program, 19690720);
