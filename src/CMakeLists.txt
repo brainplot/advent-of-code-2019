@@ -22,7 +22,7 @@ foreach(CHALLENGE ${CHALLENGES})
 	add_challenge(${CHALLENGE})
 endforeach()
 
-set(INTCODE_CHALLENGES 2;5;7)
+set(INTCODE_CHALLENGES 2;5;7;9)
 foreach(CHL ${INTCODE_CHALLENGES})
 	target_link_libraries(day_${CHL} intcode)
 endforeach()
