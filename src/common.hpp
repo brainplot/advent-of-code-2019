@@ -24,8 +24,8 @@ void trim_right(std::string& str) noexcept;
 
 void trim(std::string& str) noexcept;
 
-template<class Unit, class Function>
-void time_execution(Function const& f) noexcept(noexcept(f))
+template<class Unit, class Function, class... Args>
+void time_execution(Function const& f, Args&&... args) noexcept(noexcept(f(std::forward<Args>(args)...)))
 {
 	using namespace std::chrono;
 
@@ -33,19 +33,19 @@ void time_execution(Function const& f) noexcept(noexcept(f))
 
 	if constexpr (std::is_same_v<Unit, nanoseconds>)
 		unit = "ms";
-	else if (std::is_same_v<Unit, microseconds>)
+	else if constexpr (std::is_same_v<Unit, microseconds>)
 		unit = "\u00b5s";
-	else if (std::is_same_v<Unit, milliseconds>)
+	else if constexpr (std::is_same_v<Unit, milliseconds>)
 		unit = "ms";
-	else if (std::is_same_v<Unit, seconds>)
+	else if constexpr (std::is_same_v<Unit, seconds>)
 		unit = "s";
-	else if (std::is_same_v<Unit, minutes>)
+	else if constexpr (std::is_same_v<Unit, minutes>)
 		unit = "mins";
-	else if (std::is_same_v<Unit, hours>)
+	else if constexpr (std::is_same_v<Unit, hours>)
 		unit = "hrs";
 
 	auto const start = steady_clock::now();
-	f();
+	f(std::forward<Args>(args)...);
 	auto const end = steady_clock::now();
 
 	std::cout << "Elapsed: " << duration_cast<Unit>(end - start).count() << unit << '\n';
