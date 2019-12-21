@@ -1,5 +1,6 @@
 #include "common.hpp"
 
+#include <array>
 #include <iterator>
 
 namespace {
