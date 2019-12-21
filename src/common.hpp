@@ -12,6 +12,28 @@
 #include <utility>
 #include <vector>
 
+#if defined(_MSC_VER)
+#define DISABLE_WARNING_PUSH __pragma(warning(push))
+#define DISABLE_WARNING_POP __pragma(warning(pop))
+#define DISABLE_WARNING(warning_number) __pragma(warning(disable : warning_number))
+
+#define DISABLE_WARNING_POSSIBLE_LOSS_OF_DATA DISABLE_WARNING(4244)
+
+#elif defined(__GNUC__) || defined(__clang__)
+#define DO_PRAGMA(X) _Pragma(#X)
+#define DISABLE_WARNING_PUSH DO_PRAGMA(GCC diagnostic push)
+#define DISABLE_WARNING_POP DO_PRAGMA(GCC diagnostic pop)
+#define DISABLE_WARNING(warning_name) DO_PRAGMA(GCC diagnostic ignored #warning_name)
+
+#define DISABLE_WARNING_POSSIBLE_LOSS_OF_DATA DISABLE_WARNING(-Wfloat-conversion)
+
+#else
+#define DISABLE_WARNING_PUSH
+#define DISABLE_WARNING_POP
+#define DISABLE_WARNING_POSSIBLE_LOSS_OF_DATA
+
+#endif
+
 std::ifstream bootstrap(int, char const**);
 
 std::string load_file(std::ifstream in);
