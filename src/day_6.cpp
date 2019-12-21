@@ -23,7 +23,11 @@ auto make_map_orbitee_to_orbiters(std::string_view const input)
 	using sv = std::string_view;
 
 	std::unordered_multimap<sv, sv> orbits;
+
+	DISABLE_WARNING_PUSH
+	DISABLE_WARNING_POSSIBLE_LOSS_OF_DATA
 	orbits.reserve(std::sqrt(input.size()));
+	DISABLE_WARNING_POP
 	make_map_helper(input, [&](sv const orbitee, sv const orbiter) { orbits.emplace(orbitee, orbiter); });
 
 	return orbits;
@@ -34,7 +38,11 @@ auto make_map_orbiter_to_orbitee(std::string_view const input)
 	using sv = std::string_view;
 
 	std::unordered_map<sv, sv> orbits;
+
+	DISABLE_WARNING_PUSH
+	DISABLE_WARNING_POSSIBLE_LOSS_OF_DATA
 	orbits.reserve(std::sqrt(input.size()));
+	DISABLE_WARNING_POP
 	make_map_helper(input, [&](sv const orbitee, sv const orbiter) { orbits.emplace(orbiter, orbitee); });
 
 	return orbits;
